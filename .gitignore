@@ -35,3 +35,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Gradle
+.gradle/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Secrets
+.env
+application-local.yml

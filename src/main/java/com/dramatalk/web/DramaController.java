@@ -28,11 +28,65 @@ public class DramaController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        List<Drama> dramas = dramaRepository.findAll();
-        model.addAttribute("dramas", dramas);
+    public String list(@RequestParam(required = false) String q,
+                    @RequestParam(required = false) String year,
+                    @RequestParam(required = false) String genre,
+                    @RequestParam(required = false, defaultValue = "latest") String sort,
+                    Model model) {
+
+        var items = dramaRepository.searchWithAvg(q, year, genre);
+
+        // 정렬
+        items.sort((a, b) -> {
+            return switch (sort) {
+                case "title" -> nullSafe(a.getTitle()).compareToIgnoreCase(nullSafe(b.getTitle()));
+                case "year" -> nullSafe(a.getYear()).compareToIgnoreCase(nullSafe(b.getYear()));
+                case "ratingDesc" -> compareScoreDesc(a, b);
+                case "ratingAsc" -> compareScoreAsc(a, b);
+                case "latest" -> Long.compare(b.getId(), a.getId()); // id 큰게 최신
+                default -> Long.compare(b.getId(), a.getId());
+            };
+        });
+
+        // 필터 드롭다운에 쓰기(간단히 현재 목록에서 유니크 추출)
+        var years = items.stream().map(DramaListItem::getYear)
+                .filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
+        var genres = items.stream().map(DramaListItem::getGenre)
+                .filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
+
+        model.addAttribute("dramas", items);
+        model.addAttribute("years", years);
+        model.addAttribute("genres", genres);
+
+        // 현재 검색값 유지
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("year", year == null ? "" : year);
+        model.addAttribute("genre", genre == null ? "" : genre);
+        model.addAttribute("sort", sort);
+
         return "dramas/list";
     }
+
+    private String nullSafe(String s) { return s == null ? "" : s; }
+
+    private int compareScoreDesc(DramaListItem a, DramaListItem b) {
+        var as = a.getAvgScore();
+        var bs = b.getAvgScore();
+        if (as == null && bs == null) return 0;
+        if (as == null) return 1;   // null은 뒤로
+        if (bs == null) return -1;
+        return bs.compareTo(as);
+    }
+
+    private int compareScoreAsc(DramaListItem a, DramaListItem b) {
+        var as = a.getAvgScore();
+        var bs = b.getAvgScore();
+        if (as == null && bs == null) return 0;
+        if (as == null) return 1;
+        if (bs == null) return -1;
+        return as.compareTo(bs);
+    }
+
 
     @GetMapping("/new")
     public String newForm(Model model) {

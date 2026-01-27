@@ -7,13 +7,46 @@
 <body>
 <h1>드라마 목록</h1>
 
+<form th:action="@{/dramas}" method="get">
+  <input type="text" name="q" placeholder="제목 검색" th:value="${q}"/>
+
+  <select name="year">
+    <option value="" th:selected="${year == ''}">연도(전체)</option>
+    <option th:each="y : ${years}" th:value="${y}" th:text="${y}" th:selected="${y == year}"></option>
+  </select>
+
+  <select name="genre">
+    <option value="" th:selected="${genre == ''}">장르(전체)</option>
+    <option th:each="g : ${genres}" th:value="${g}" th:text="${g}" th:selected="${g == genre}"></option>
+  </select>
+
+  <select name="sort">
+    <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
+    <option value="title" th:selected="${sort == 'title'}">제목순</option>
+    <option value="year" th:selected="${sort == 'year'}">연도순</option>
+    <option value="ratingDesc" th:selected="${sort == 'ratingDesc'}">평점 높은순</option>
+    <option value="ratingAsc" th:selected="${sort == 'ratingAsc'}">평점 낮은순</option>
+  </select>
+
+  <button type="submit">검색/정렬</button>
+  <a th:href="@{/dramas}">초기화</a>
+</form>
+
 <p><a th:href="@{/dramas/new}">+ 새 드라마 등록</a></p>
 
 <ul>
   <li th:each="d : ${dramas}">
     <a th:href="@{|/dramas/${d.id}|}" th:text="${d.title}">title</a>
+
     <span th:if="${d.year != null and !#strings.isEmpty(d.year)}"
           th:text="${' (' + d.year + ')'}"></span>
+
+    <span th:if="${d.genre != null and !#strings.isEmpty(d.genre)}"
+          th:text="${' - ' + d.genre}"></span>
+
+    <span th:if="${d.avgScore != null}"
+          th:text="${' | 평균: ' + d.avgScore}"></span>
+    <span th:if="${d.avgScore == null}"> | 평균: -</span>
   </li>
 </ul>
 

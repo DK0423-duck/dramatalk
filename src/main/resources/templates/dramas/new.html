@@ -5,33 +5,40 @@
   <title>New Drama</title>
 </head>
 <body>
+
 <h1>드라마 등록</h1>
 
 <form th:action="@{/dramas}" th:object="${dramaForm}" method="post">
   <div>
     <label>제목</label>
-    <input type="text" th:field="*{title}">
+    <input type="text" th:field="*{title}" placeholder="예: 응답하라 1988">
     <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
   </div>
 
   <div>
     <label>연도</label>
     <input type="text" th:field="*{year}" placeholder="예: 2023">
+    <div th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
   </div>
 
   <div>
     <label>장르</label>
-    <input type="text" th:field="*{genre}">
+    <input type="text" th:field="*{genre}" placeholder="예: 로맨스, 미스터리">
+    <div th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
   </div>
 
   <div>
     <label>줄거리</label>
-    <textarea th:field="*{synopsis}" rows="5" cols="60"></textarea>
+    <textarea th:field="*{synopsis}" rows="6" cols="70" placeholder="간단한 줄거리를 적어주세요."></textarea>
+    <div th:if="${#fields.hasErrors('synopsis')}" th:errors="*{synopsis}"></div>
   </div>
 
   <button type="submit">저장</button>
 </form>
 
-<p><a th:href="@{/dramas}">목록으로</a></p>
+<p style="margin-top: 12px;">
+  <a th:href="@{/dramas}">목록으로</a>
+</p>
+
 </body>
 </html>

@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -21,11 +22,17 @@ public class DramaController {
 
     private final DramaRepository dramaRepository;
     private final RatingRepository ratingRepository;
+    private final com.dramatalk.domain.post.PostRepository postRepository;
+    
 
-    public DramaController(DramaRepository dramaRepository, RatingRepository ratingRepository) {
-        this.dramaRepository = dramaRepository;
-        this.ratingRepository = ratingRepository;
-    }
+    public DramaController(DramaRepository dramaRepository,
+                       RatingRepository ratingRepository,
+                       com.dramatalk.domain.post.PostRepository postRepository) {
+    this.dramaRepository = dramaRepository;
+    this.ratingRepository = ratingRepository;
+    this.postRepository = postRepository;
+}
+
 
     @GetMapping
     public String list(@RequestParam(required = false) String q,
@@ -158,6 +165,8 @@ public class DramaController {
         Drama drama = dramaRepository.findById(id).orElseThrow();
         List<Rating> ratings = ratingRepository.findByDramaIdOrderByCreatedAtDesc(id);
 
+        var posts = postRepository.findByDramaIdOrderByCreatedAtDesc(id);
+
         Double avg = ratingRepository.findAverageScore(id);
         BigDecimal avgRounded = null;
         if (avg != null) {
@@ -166,6 +175,7 @@ public class DramaController {
 
         model.addAttribute("drama", drama);
         model.addAttribute("ratings", ratings);
+        model.addAttribute("posts", posts);
         model.addAttribute("avgScore", avgRounded);
 
         model.addAttribute("ratingForm", new RatingForm());

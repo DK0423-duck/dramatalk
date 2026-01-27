@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>New Post</title>
+</head>
+<body>
+<p><a th:href="@{|/dramas/${drama.id}|}">← 드라마로</a></p>
+<h1 th:text="${drama.title + ' 토론 글 작성'}"></h1>
+
+<form th:action="@{|/dramas/${drama.id}/posts|}" th:object="${postForm}" method="post">
+  <div>
+    <label>제목</label>
+    <input type="text" th:field="*{title}">
+    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+  </div>
+
+  <div>
+    <label>내용</label>
+    <textarea th:field="*{content}" rows="10" cols="70"></textarea>
+    <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+  </div>
+
+  <button type="submit">등록</button>
+</form>
+</body>
+</html>

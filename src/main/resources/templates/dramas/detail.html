@@ -6,14 +6,22 @@
 </head>
 <body>
 
-<p><a th:href="@{/dramas}">← 목록</a></p>
+<p>
+  <a th:href="@{/dramas}">← 목록</a>
+</p>
 
 <h1 th:text="${drama.title}">제목</h1>
+
 <p>
-  <span th:if="${drama.year != null and !#strings.isEmpty(drama.year)}" th:text="${'연도: ' + drama.year}"></span>
+  <span th:if="${drama.year != null and !#strings.isEmpty(drama.year)}"
+        th:text="${'연도: ' + drama.year}">연도</span>
 </p>
-<p th:if="${drama.genre != null and !#strings.isEmpty(drama.genre)}" th:text="${'장르: ' + drama.genre}"></p>
-<p th:if="${drama.synopsis != null and !#strings.isEmpty(drama.synopsis)}" th:text="${drama.synopsis}"></p>
+
+<p th:if="${drama.genre != null and !#strings.isEmpty(drama.genre)}"
+   th:text="${'장르: ' + drama.genre}">장르</p>
+
+<p th:if="${drama.synopsis != null and !#strings.isEmpty(drama.synopsis)}"
+   th:text="${drama.synopsis}">줄거리</p>
 
 <hr/>
 
@@ -32,12 +40,14 @@
               th:text="${s}"></option>
     </select>
     <div th:if="${#fields.hasErrors('score')}" th:errors="*{score}"></div>
-    <div th:if="${#fields.hasGlobalErrors()}" th:each="e: ${#fields.globalErrors()}" th:text="${e}"></div>
+    <div th:if="${#fields.hasGlobalErrors()}"
+         th:each="e: ${#fields.globalErrors()}"
+         th:text="${e}"></div>
   </div>
 
   <div>
     <label>한줄평(선택)</label>
-    <input type="text" th:field="*{comment}" maxlength="300">
+    <input type="text" th:field="*{comment}" maxlength="300" placeholder="예: 몰입감 좋았음">
     <div th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
   </div>
 
@@ -51,8 +61,24 @@
   <li th:if="${#lists.isEmpty(ratings)}">아직 등록된 평점이 없습니다.</li>
   <li th:each="r : ${ratings}">
     <strong th:text="${r.score}">4.5</strong>
-    <span th:if="${r.comment != null and !#strings.isEmpty(r.comment)}" th:text="${' - ' + r.comment}"></span>
+    <span th:if="${r.comment != null and !#strings.isEmpty(r.comment)}"
+          th:text="${' - ' + r.comment}"></span>
     <small th:text="${' (' + r.createdAt + ')'}"></small>
+  </li>
+</ul>
+
+<hr/>
+
+<h2>토론</h2>
+<p>
+  <a th:href="@{|/dramas/${drama.id}/posts/new|}">+ 글 작성</a>
+</p>
+
+<ul>
+  <li th:if="${#lists.isEmpty(posts)}">아직 글이 없습니다.</li>
+  <li th:each="p : ${posts}">
+    <a th:href="@{|/posts/${p.id}|}" th:text="${p.title}">글 제목</a>
+    <small th:text="${' (' + p.createdAt + ')'}"></small>
   </li>
 </ul>
 

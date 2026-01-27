@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Post</title>
+</head>
+<body>
+
+<p>
+  <a th:href="@{|/dramas/${post.drama.id}|}">← 드라마로</a>
+</p>
+
+<h1 th:text="${post.title}"></h1>
+<pre th:text="${post.content}"></pre>
+<p><small th:text="${post.createdAt}"></small></p>
+
+<hr/>
+
+<h2>댓글</h2>
+<form th:action="@{|/posts/${post.id}/comments|}" th:object="${commentForm}" method="post">
+  <input type="text" th:field="*{content}" maxlength="500" placeholder="댓글을 입력하세요">
+  <button type="submit">등록</button>
+  <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+</form>
+
+<ul>
+  <li th:if="${#lists.isEmpty(comments)}">댓글이 없습니다.</li>
+  <li th:each="c : ${comments}">
+    <span th:text="${c.content}"></span>
+    <small th:text="${' (' + c.createdAt + ')'}"></small>
+  </li>
+</ul>
+
+</body>
+</html>

@@ -212,6 +212,47 @@ public class DramaController {
         return "redirect:/dramas/" + id;
     }
 
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model) {
+        var drama = dramaRepository.findById(id).orElseThrow();
+
+        DramaForm form = new DramaForm();
+        form.setId(drama.getId());
+        form.setTitle(drama.getTitle());
+        form.setYear(drama.getYear());
+        form.setGenre(drama.getGenre());
+        form.setSynopsis(drama.getSynopsis());
+
+        model.addAttribute("dramaForm", form);
+        return "dramas/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String update(@PathVariable Long id,
+                        @Valid @ModelAttribute("dramaForm") DramaForm dramaForm,
+                        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "dramas/edit";
+        }
+
+        var drama = dramaRepository.findById(id).orElseThrow();
+        drama.setTitle(dramaForm.getTitle());
+        drama.setYear(dramaForm.getYear());
+        drama.setGenre(dramaForm.getGenre());
+        drama.setSynopsis(dramaForm.getSynopsis());
+
+        dramaRepository.save(drama);
+        return "redirect:/dramas/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id) {
+        // 평점/토론글이 FK로 연결되어 있으면 삭제가 막힐 수 있음(다음 단계에서 처리 가능)
+        dramaRepository.deleteById(id);
+        return "redirect:/dramas";
+    }
+
+
     private List<BigDecimal> buildScoreOptions() {
         List<BigDecimal> list = new ArrayList<>();
         for (int i = 2; i <= 10; i++) { // 1.0*2=2 ~ 5.0*2=10

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Edit Drama</title>
+</head>
+<body>
+
+<h1>드라마 수정</h1>
+
+<form th:action="@{|/dramas/${dramaForm.id}/edit|}" th:object="${dramaForm}" method="post">
+  <div>
+    <label>제목</label>
+    <input type="text" th:field="*{title}">
+    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+  </div>
+
+  <div>
+    <label>연도</label>
+    <input type="text" th:field="*{year}">
+    <div th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+  </div>
+
+  <div>
+    <label>장르</label>
+    <input type="text" th:field="*{genre}">
+    <div th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
+  </div>
+
+  <div>
+    <label>줄거리</label>
+    <textarea th:field="*{synopsis}" rows="6" cols="70"></textarea>
+    <div th:if="${#fields.hasErrors('synopsis')}" th:errors="*{synopsis}"></div>
+  </div>
+
+  <button type="submit">수정 저장</button>
+</form>
+
+<p style="margin-top: 12px;">
+  <a th:href="@{|/dramas/${dramaForm.id}|}">취소</a>
+</p>
+
+</body>
+</html>

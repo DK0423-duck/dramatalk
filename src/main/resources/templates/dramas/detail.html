@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Drama Detail</title>
+</head>
+<body>
+
+<p><a th:href="@{/dramas}">← 목록</a></p>
+
+<h1 th:text="${drama.title}">제목</h1>
+<p>
+  <span th:if="${drama.year != null and !#strings.isEmpty(drama.year)}" th:text="${'연도: ' + drama.year}"></span>
+</p>
+<p th:if="${drama.genre != null and !#strings.isEmpty(drama.genre)}" th:text="${'장르: ' + drama.genre}"></p>
+<p th:if="${drama.synopsis != null and !#strings.isEmpty(drama.synopsis)}" th:text="${drama.synopsis}"></p>
+
+<hr/>
+
+<h2>평균 평점</h2>
+<p th:if="${avgScore != null}" th:text="${avgScore}">평균</p>
+<p th:if="${avgScore == null}">아직 평점이 없어요.</p>
+
+<h2>평점 남기기</h2>
+<form th:action="@{|/dramas/${drama.id}/ratings|}" th:object="${ratingForm}" method="post">
+  <div>
+    <label>점수</label>
+    <select th:field="*{score}">
+      <option value="" disabled selected>선택</option>
+      <option th:each="s : ${scoreOptions}"
+              th:value="${s}"
+              th:text="${s}"></option>
+    </select>
+    <div th:if="${#fields.hasErrors('score')}" th:errors="*{score}"></div>
+    <div th:if="${#fields.hasGlobalErrors()}" th:each="e: ${#fields.globalErrors()}" th:text="${e}"></div>
+  </div>
+
+  <div>
+    <label>한줄평(선택)</label>
+    <input type="text" th:field="*{comment}" maxlength="300">
+    <div th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
+  </div>
+
+  <button type="submit">등록</button>
+</form>
+
+<hr/>
+
+<h2>최근 평점</h2>
+<ul>
+  <li th:if="${#lists.isEmpty(ratings)}">아직 등록된 평점이 없습니다.</li>
+  <li th:each="r : ${ratings}">
+    <strong th:text="${r.score}">4.5</strong>
+    <span th:if="${r.comment != null and !#strings.isEmpty(r.comment)}" th:text="${' - ' + r.comment}"></span>
+    <small th:text="${' (' + r.createdAt + ')'}"></small>
+  </li>
+</ul>
+
+</body>
+</html>

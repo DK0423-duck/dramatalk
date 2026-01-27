@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>New Drama</title>
+</head>
+<body>
+<h1>드라마 등록</h1>
+
+<form th:action="@{/dramas}" th:object="${dramaForm}" method="post">
+  <div>
+    <label>제목</label>
+    <input type="text" th:field="*{title}">
+    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+  </div>
+
+  <div>
+    <label>연도</label>
+    <input type="text" th:field="*{year}" placeholder="예: 2023">
+  </div>
+
+  <div>
+    <label>장르</label>
+    <input type="text" th:field="*{genre}">
+  </div>
+
+  <div>
+    <label>줄거리</label>
+    <textarea th:field="*{synopsis}" rows="5" cols="60"></textarea>
+  </div>
+
+  <button type="submit">저장</button>
+</form>
+
+<p><a th:href="@{/dramas}">목록으로</a></p>
+</body>
+</html>

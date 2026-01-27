@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dramas</title>
+</head>
+<body>
+<h1>드라마 목록</h1>
+
+<p><a th:href="@{/dramas/new}">+ 새 드라마 등록</a></p>
+
+<ul>
+  <li th:each="d : ${dramas}">
+    <a th:href="@{|/dramas/${d.id}|}" th:text="${d.title}">title</a>
+    <span th:if="${d.year != null and !#strings.isEmpty(d.year)}"
+          th:text="${' (' + d.year + ')'}"></span>
+  </li>
+</ul>
+
+</body>
+</html>

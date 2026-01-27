@@ -20,6 +20,17 @@
     <option th:each="g : ${genres}" th:value="${g}" th:text="${g}" th:selected="${g == genre}"></option>
   </select>
 
+  <!-- 평균 평점 범위 -->
+  <select name="minAvg">
+    <option value="" th:selected="${minAvg == ''}">평균평점 최소</option>
+    <option th:each="s : ${scoreOptions}" th:value="${s}" th:text="${s}" th:selected="${#strings.toString(s) == minAvg}"></option>
+  </select>
+
+  <select name="maxAvg">
+    <option value="" th:selected="${maxAvg == ''}">평균평점 최대</option>
+    <option th:each="s : ${scoreOptions}" th:value="${s}" th:text="${s}" th:selected="${#strings.toString(s) == maxAvg}"></option>
+  </select>
+
   <select name="sort">
     <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
     <option value="title" th:selected="${sort == 'title'}">제목순</option>
@@ -49,6 +60,21 @@
     <span th:if="${d.avgScore == null}"> | 평균: -</span>
   </li>
 </ul>
+
+<!-- 페이지네이션 -->
+<div style="margin-top: 16px;">
+  <a th:if="${page > 1}"
+     th:href="@{/dramas(q=${q}, year=${year}, genre=${genre}, minAvg=${minAvg}, maxAvg=${maxAvg}, sort=${sort}, page=${page-1}, size=${size})}">
+    ← 이전
+  </a>
+
+  <span th:text="${page + ' / ' + totalPages}"></span>
+
+  <a th:if="${page < totalPages}"
+     th:href="@{/dramas(q=${q}, year=${year}, genre=${genre}, minAvg=${minAvg}, maxAvg=${maxAvg}, sort=${sort}, page=${page+1}, size=${size})}">
+    다음 →
+  </a>
+</div>
 
 </body>
 </html>

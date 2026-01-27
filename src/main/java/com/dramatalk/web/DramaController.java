@@ -31,41 +31,84 @@ public class DramaController {
     public String list(@RequestParam(required = false) String q,
                     @RequestParam(required = false) String year,
                     @RequestParam(required = false) String genre,
+                    @RequestParam(required = false) String minAvg,   // 추가
+                    @RequestParam(required = false) String maxAvg,   // 추가
                     @RequestParam(required = false, defaultValue = "latest") String sort,
+                    @RequestParam(required = false, defaultValue = "1") int page,   // 1부터
+                    @RequestParam(required = false, defaultValue = "10") int size,
                     Model model) {
 
         var items = dramaRepository.searchWithAvg(q, year, genre);
 
-        // 정렬
-        items.sort((a, b) -> {
-            return switch (sort) {
-                case "title" -> nullSafe(a.getTitle()).compareToIgnoreCase(nullSafe(b.getTitle()));
-                case "year" -> nullSafe(a.getYear()).compareToIgnoreCase(nullSafe(b.getYear()));
-                case "ratingDesc" -> compareScoreDesc(a, b);
-                case "ratingAsc" -> compareScoreAsc(a, b);
-                case "latest" -> Long.compare(b.getId(), a.getId()); // id 큰게 최신
-                default -> Long.compare(b.getId(), a.getId());
-            };
-        });
+        // 평균 평점 필터 (평균 평점 기준)
+        var min = parseDecimal(minAvg);
+        var max = parseDecimal(maxAvg);
 
-        // 필터 드롭다운에 쓰기(간단히 현재 목록에서 유니크 추출)
+        if (min != null || max != null) {
+            items = items.stream()
+                    .filter(i -> i.getAvgScore() != null) // 필터 걸면 평점 없는 건 제외
+                    .filter(i -> min == null || i.getAvgScore().compareTo(min) >= 0)
+                    .filter(i -> max == null || i.getAvgScore().compareTo(max) <= 0)
+                    .toList();
+        }
+
+        // 정렬
+        items = items.stream().sorted((a, b) -> switch (sort) {
+            case "title" -> nullSafe(a.getTitle()).compareToIgnoreCase(nullSafe(b.getTitle()));
+            case "year" -> nullSafe(a.getYear()).compareToIgnoreCase(nullSafe(b.getYear()));
+            case "ratingDesc" -> compareScoreDesc(a, b);
+            case "ratingAsc" -> compareScoreAsc(a, b);
+            case "latest" -> Long.compare(b.getId(), a.getId());
+            default -> Long.compare(b.getId(), a.getId());
+        }).toList();
+
+        // 페이지네이션 (in-memory)
+        int total = items.size();
+        int totalPages = (int) Math.ceil(total / (double) size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int from = (page - 1) * size;
+        int to = Math.min(from + size, total);
+
+        var pageItems = items.subList(from, to);
+
+        // 필터 드롭다운용 유니크 값
         var years = items.stream().map(DramaListItem::getYear)
                 .filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
         var genres = items.stream().map(DramaListItem::getGenre)
                 .filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
 
-        model.addAttribute("dramas", items);
+        model.addAttribute("dramas", pageItems);
         model.addAttribute("years", years);
         model.addAttribute("genres", genres);
+
+        // 평점 옵션(1.0~5.0 step 0.5)
+        model.addAttribute("scoreOptions", buildScoreOptions());
 
         // 현재 검색값 유지
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("year", year == null ? "" : year);
         model.addAttribute("genre", genre == null ? "" : genre);
+        model.addAttribute("minAvg", minAvg == null ? "" : minAvg);
+        model.addAttribute("maxAvg", maxAvg == null ? "" : maxAvg);
         model.addAttribute("sort", sort);
+
+        // 페이징 정보
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("totalPages", totalPages);
 
         return "dramas/list";
     }
+
+    private java.math.BigDecimal parseDecimal(String s) {
+        if (s == null || s.isBlank()) return null;
+        try { return new java.math.BigDecimal(s); }
+        catch (Exception e) { return null; }
+    }
+
 
     private String nullSafe(String s) { return s == null ? "" : s; }
 

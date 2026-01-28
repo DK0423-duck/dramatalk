@@ -1,5 +1,8 @@
 package com.dramatalk.web;
 
+import com.dramatalk.domain.post.CommentRepository;
+import com.dramatalk.domain.post.PostRepository;
+import org.springframework.transaction.annotation.Transactional;
 import com.dramatalk.domain.drama.Drama;
 import com.dramatalk.domain.drama.DramaRepository;
 import com.dramatalk.domain.rating.Rating;
@@ -9,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,16 +23,19 @@ import java.util.List;
 public class DramaController {
 
     private final DramaRepository dramaRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final RatingRepository ratingRepository;
-    private final com.dramatalk.domain.post.PostRepository postRepository;
-    
+
 
     public DramaController(DramaRepository dramaRepository,
                        RatingRepository ratingRepository,
-                       com.dramatalk.domain.post.PostRepository postRepository) {
+                       PostRepository postRepository,
+                    CommentRepository commentRepository) {
     this.dramaRepository = dramaRepository;
     this.ratingRepository = ratingRepository;
     this.postRepository = postRepository;
+    this.commentRepository = commentRepository;
 }
 
 
@@ -247,11 +252,21 @@ public class DramaController {
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {
-        // 평점/토론글이 FK로 연결되어 있으면 삭제가 막힐 수 있음(다음 단계에서 처리 가능)
+        
+         // 1) 평점 삭제
+        ratingRepository.deleteByDramaId(id);
+
+        // 2) 댓글 삭제 (post의 dramaId 기준으로 싹 지움)
+        commentRepository.deleteByPostDramaId(id);
+
+        // 3) 글 삭제
+        postRepository.deleteByDramaId(id);
+
+        // 4) 마지막으로 드라마 삭제
         dramaRepository.deleteById(id);
+        
         return "redirect:/dramas";
     }
-
 
     private List<BigDecimal> buildScoreOptions() {
         List<BigDecimal> list = new ArrayList<>();
@@ -261,4 +276,3 @@ public class DramaController {
         return list;
     }
 }
-
